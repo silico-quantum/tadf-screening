@@ -48,7 +48,7 @@ The screening results shown below are provided **only as a usage flow demonstrat
 
 For publication-quality results, upgrade to **def2-SVP/def2-TZVP** with **SMD solvation** and **DFT-optimized geometries**.
 
-## 📊 Screening Results (Demo)
+## 📊 Screening Results
 
 12 known TADF molecules screened with B3LYP/3-21G:
 
@@ -67,73 +67,48 @@ For publication-quality results, upgrade to **def2-SVP/def2-TZVP** with **SMD so
 | 4CzIPN | 2.88 | 2.74 | 0.14 | 0.05 | 430 | ❌ |
 | DPA-TRZ | 2.95 | 2.80 | 0.15 | 0.07 | 420 | ❌ |
 
-**4 candidates** passed the 450-550nm emission filter: DMAC-BO, DMAC-DPS, PXZ-TRZ, PXZ-BO.
-
 ## 🖼️ Visual Gallery
 
-### Molecular Structures
+### Pipeline Output Examples
 
-<details>
-<summary><b>Click to expand structures</b></summary>
+The following figures are generated from the actual screening run. They demonstrate the full output of the pipeline: molecular structures, frontier molecular orbitals, and simulated absorption/emission spectra.
 
-#### DMAC-BO (9,9-dimethyl-N,2,7-triphenyl-9,10-dihydroacridin-10-amine)
-![DMAC-BO Structure](examples/figures/mol_DMAC-BO_struct.png)
-**Highest oscillator strength** (f = 0.09), S₁ = 2.70 eV
+<img src="examples/figures/mol_DMAC-DPS_struct.png" width="200" align="right">
 
-#### DMAC-DPS (9,9-dimethyl-10-(4-(phenylsulfonyl)phenyl)-9,10-dihydroacridine)
-![DMAC-DPS Structure](examples/figures/mol_DMAC-DPS_struct.png)
-S₁ = 2.75 eV, ΔE_ST = 0.11 eV
+**DMAC-DPS** — A representative TADF candidate passing the 450-550nm filter. The spatial separation between HOMO (donor-localized on DMAC) and LUMO (acceptor-localized on DPS) is clearly visible — the hallmark of TADF-active molecules.
 
-#### PXZ-TRZ (10-(4-(4,6-diphenyl-1,3,5-triazin-2-yl)phenyl)-10H-phenoxazine)
-![PXZ-TRZ Structure](examples/figures/mol_PXZ-TRZ_struct.png)
-S₁ = 2.65 eV, ΔE_ST = 0.12 eV
+<br clear="right">
 
-#### PXZ-BO (N-(4-(10H-phenoxazin-10-yl)phenyl)-N-phenylaniline)
-![PXZ-BO Structure](examples/figures/mol_PXZ-BO_struct.png)
-**Longest emission wavelength** (473 nm), S₁ = 2.62 eV
+### Molecular Structures (4 passing candidates)
 
-</details>
+| DMAC-BO | DMAC-DPS | PXZ-TRZ | PXZ-BO |
+|:---:|:---:|:---:|:---:|
+| <img src="examples/figures/mol_DMAC-BO_struct.png" width="180"> | <img src="examples/figures/mol_DMAC-DPS_struct.png" width="180"> | <img src="examples/figures/mol_PXZ-TRZ_struct.png" width="180"> | <img src="examples/figures/mol_PXZ-BO_struct.png" width="180"> |
+| f = 0.09 | f = 0.07 | f = 0.06 | f = 0.05 |
+| λ_em = 459 nm | λ_em = 451 nm | λ_em = 468 nm | λ_em = 473 nm |
 
-### Molecular Orbitals
+### HOMO/LUMO Orbitals — D-A Separation Character
 
-<details>
-<summary><b>Click to expand HOMO/LUMO orbitals</b></summary>
-
-The spatial separation between HOMO (donor-localized) and LUMO (acceptor-localized) is the hallmark of TADF-active molecules, enabling small ΔE_ST through spatial overlap control.
-
-#### DMAC-DPS
-| HOMO (Donor) | LUMO (Acceptor) |
-|:---:|:---:|
-| ![DMAC-DPS HOMO](examples/figures/mol_DMAC-DPS_homo.png) | ![DMAC-DPS LUMO](examples/figures/mol_DMAC-DPS_lumo.png) |
-
-#### PXZ-TRZ
-| HOMO (Donor) | LUMO (Acceptor) |
-|:---:|:---:|
-| ![PXZ-TRZ HOMO](examples/figures/mol_PXZ-TRZ_homo.png) | ![PXZ-TRZ LUMO](examples/figures/mol_PXZ-TRZ_lumo.png) |
-
-#### PXZ-BO
-| HOMO (Donor) | LUMO (Acceptor) |
-|:---:|:---:|
-| ![PXZ-BO HOMO](examples/figures/mol_PXZ-BO_homo.png) | ![PXZ-BO LUMO](examples/figures/mol_PXZ-BO_lumo.png) |
-
-</details>
+| DMAC-DPS | PXZ-TRZ | PXZ-BO |
+|:---:|:---:|:---:|
+| <img src="examples/figures/mol_DMAC-DPS_homo.png" width="200"><br><img src="examples/figures/mol_DMAC-DPS_lumo.png" width="200"> | <img src="examples/figures/mol_PXZ-TRZ_homo.png" width="200"><br><img src="examples/figures/mol_PXZ-TRZ_lumo.png" width="200"> | <img src="examples/figures/mol_PXZ-BO_homo.png" width="200"><br><img src="examples/figures/mol_PXZ-BO_lumo.png" width="200"> |
+| HOMO (top) → LUMO (bottom) | HOMO (top) → LUMO (bottom) | HOMO (top) → LUMO (bottom) |
 
 ### Absorption & Emission Spectra
 
+| DMAC-BO | DMAC-DPS | PXZ-TRZ | PXZ-BO |
+|:---:|:---:|:---:|:---:|
+| <img src="examples/figures/mol_DMAC-BO_spectra.png" width="200"> | <img src="examples/figures/mol_DMAC-DPS_spectra.png" width="200"> | <img src="examples/figures/mol_PXZ-TRZ_spectra.png" width="200"> | <img src="examples/figures/mol_PXZ-BO_spectra.png" width="200"> |
+
 <details>
-<summary><b>Click to expand spectra</b></summary>
+<summary><b>📖 What the pipeline outputs</b></summary>
 
-#### DMAC-BO (f = 0.09)
-![DMAC-BO Spectra](examples/figures/mol_DMAC-BO_spectra.png)
-
-#### DMAC-DPS (f = 0.07)
-![DMAC-DPS Spectra](examples/figures/mol_DMAC-DPS_spectra.png)
-
-#### PXZ-TRZ (f = 0.06)
-![PXZ-TRZ Spectra](examples/figures/mol_PXZ-TRZ_spectra.png)
-
-#### PXZ-BO (f = 0.05)
-![PXZ-BO Spectra](examples/figures/mol_PXZ-BO_spectra.png)
+For each molecule, the pipeline generates:
+- **Structure** (`mol_*_struct.png`) — xyzrender molecular visualization with bond orders
+- **HOMO** (`mol_*_homo.png`) — Highest occupied molecular orbital (donor-localized in TADF)
+- **LUMO** (`mol_*_lumo.png`) — Lowest unoccupied molecular orbital (acceptor-localized in TADF)
+- **Spectra** (`mol_*_spectra.png`) — Gaussian-broadened absorption (blue) and emission (red)
+- **CSV** (`screening_results.csv`) — Tabular results with energies, oscillator strengths, and filter status
 
 </details>
 
