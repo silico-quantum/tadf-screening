@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+temp/
+*.cube
+*.log
+xtbopt.log
+gfnff_topo
+gfnff_charges
