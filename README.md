@@ -16,6 +16,17 @@ SMILES → RDKit 3D → xTB GFN-FF opt → PySCF B3LYP/3-21G TDDFT → Filter �
 - 📊 Automated filtering (450-550nm emission, ΔE_ST < 0.3eV, f > 0.001)
 - 🎨 xyzrender for molecular structure + MO visualization
 
+## ⚠️ Disclaimer
+
+The screening results below are provided **only as a usage flow demonstration**. This pipeline uses B3LYP/3-21G (a minimal basis set) in gas phase with GFN-FF geometries — this level of theory is **not accurate enough for publication**. Known systematic errors include:
+
+- **Absorption/emission wavelengths** blue-shifted by ~0.5-1.0 eV compared to experiment (3-21G artifact)
+- **ΔE_ST values** qualitatively correct but quantitatively unreliable at this level
+- **No solvent effects** (PCM/SMD would shift energies significantly)
+- **Single conformer** — no conformational search
+
+For research-grade results, upgrade to def2-SVP/def2-TZVP with SMD solvation and DFT-optimized geometries.
+
 ## Screening Results
 
 12 known TADF molecules screened with B3LYP/3-21G:
