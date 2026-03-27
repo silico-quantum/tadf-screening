@@ -1,33 +1,54 @@
 # 🔬 TADF Screening Pipeline
 
-High-throughput computational screening of Thermally Activated Delayed Fluorescence (TADF) emitters using PySCF TDDFT + xTB GFN-FF.
+**Computational screening of Thermally Activated Delayed Fluorescence (TADF) emitters** — from SMILES to molecular orbitals and spectra, fully automated.
 
-## Pipeline Overview
+<p align="center">
+  <b>SMILES → RDKit 3D → xTB GFN-FF opt → PySCF TDDFT → Filter → Visualize</b>
+</p>
+
+## 🧬 About
+
+TADF emitters are a key class of materials for next-generation OLED displays and lighting. The core challenge lies in the **singlet-triplet energy gap (ΔE_ST)**: a small gap enables reverse intersystem crossing (RISC), harvesting both singlet and triplet excitons for up to 100% internal quantum efficiency.
+
+This pipeline automates the computational screening workflow:
+
+1. **Molecule preparation** — RDKit ETKDG conformer generation from SMILES
+2. **Geometry optimization** — xTB GFN-FF (semi-empirical, ~3-5s/molecule)
+3. **Excited state calculation** — PySCF TDDFT (B3LYP/3-21G, TDA, 10 states)
+4. **Triplet energy** — ΔSCF approach (UKS spin=2)
+5. **Filtering** — emission wavelength, ΔE_ST, oscillator strength
+6. **Visualization** — molecular structures, HOMO/LUMO orbitals, absorption/emission spectra (xyzrender + matplotlib)
+
+## 🌐 Silico Quantum Ecosystem
+
+This repository is part of the **[silico-quantum](https://github.com/silico-quantum)** organization — a collection of open-source tools for computational chemistry, developed and maintained by **Silico (硅灵)** 🔮, an AI research partner.
+
+| Repository | Description |
+|------------|-------------|
+| **[quantum-chem-skills](https://github.com/silico-quantum/quantum-chem-skills)** | Core quantum chemistry skills: PySCF wrappers, molecular sampling, wavefunction analysis, xTB cluster MD, and automation scripts |
+| **[tadf-screening](https://github.com/silico-quantum/tadf-screening)** *(this repo)* | TADF emitter screening pipeline: D-A molecule screening, TDDFT calculations, orbital visualization |
+| [workspace](https://github.com/silico-quantum/workspace) | Shared workspace and experimental prototypes |
+
+**Relationship to quantum-chem-skills:** This TADF pipeline builds directly on the foundational tools from `quantum-chem-skills`, including PySCF TDDFT wrappers, xyzrender MO visualization patterns, and xTB integration. Together they form a layered toolkit:
 
 ```
-SMILES → RDKit 3D → xTB GFN-FF opt → PySCF B3LYP/3-21G TDDFT → Filter → Visualize
+quantum-chem-skills          →  Core primitives (PySCF, xyzrender, xTB, Multiwfn)
+    └── tadf-screening       →  Domain-specific pipeline (TADF screening, D-A filtering)
+        └── future repos     →  Application-specific tools (dye design, OLED simulation...)
 ```
-
-**Key features:**
-- 🧪 12 verified TADF molecules (SMILES from PubChem CID)
-- ⚡ xTB GFN-FF for fast geometry optimization (~3-5s/molecule)
-- 🎯 PySCF TDDFT (B3LYP/3-21G, TDA, 10 states) for excited states
-- 🔄 ΔSCF (UKS spin=2) for T₁ energy
-- 📊 Automated filtering (450-550nm emission, ΔE_ST < 0.3eV, f > 0.001)
-- 🎨 xyzrender for molecular structure + MO visualization
 
 ## ⚠️ Disclaimer
 
-The screening results below are provided **only as a usage flow demonstration**. This pipeline uses B3LYP/3-21G (a minimal basis set) in gas phase with GFN-FF geometries — this level of theory is **not accurate enough for publication**. Known systematic errors include:
+The screening results shown below are provided **only as a usage flow demonstration**. This pipeline uses B3LYP/3-21G (a minimal basis set) in gas phase with GFN-FF geometries — this level of theory carries **significant systematic errors**:
 
-- **Absorption/emission wavelengths** blue-shifted by ~0.5-1.0 eV compared to experiment (3-21G artifact)
-- **ΔE_ST values** qualitatively correct but quantitatively unreliable at this level
-- **No solvent effects** (PCM/SMD would shift energies significantly)
+- **Absorption/emission wavelengths** blue-shifted by ~0.5-1.0 eV vs experiment (3-21G artifact)
+- **ΔE_ST values** qualitatively correct but not quantitatively reliable
+- **No solvent effects** (PCM/SMD would shift energies by ~0.1-0.3 eV)
 - **Single conformer** — no conformational search
 
-For research-grade results, upgrade to def2-SVP/def2-TZVP with SMD solvation and DFT-optimized geometries.
+For publication-quality results, upgrade to **def2-SVP/def2-TZVP** with **SMD solvation** and **DFT-optimized geometries**.
 
-## Screening Results
+## 📊 Screening Results (Demo)
 
 12 known TADF molecules screened with B3LYP/3-21G:
 
@@ -46,11 +67,14 @@ For research-grade results, upgrade to def2-SVP/def2-TZVP with SMD solvation and
 | 4CzIPN | 2.88 | 2.74 | 0.14 | 0.05 | 430 | ❌ |
 | DPA-TRZ | 2.95 | 2.80 | 0.15 | 0.07 | 420 | ❌ |
 
-4 candidates passed the 450-550nm emission filter.
+**4 candidates** passed the 450-550nm emission filter: DMAC-BO, DMAC-DPS, PXZ-TRZ, PXZ-BO.
 
-## Visual Gallery
+## 🖼️ Visual Gallery
 
 ### Molecular Structures
+
+<details>
+<summary><b>Click to expand structures</b></summary>
 
 #### DMAC-BO (9,9-dimethyl-N,2,7-triphenyl-9,10-dihydroacridin-10-amine)
 ![DMAC-BO Structure](examples/figures/mol_DMAC-BO_struct.png)
@@ -68,29 +92,36 @@ S₁ = 2.65 eV, ΔE_ST = 0.12 eV
 ![PXZ-BO Structure](examples/figures/mol_PXZ-BO_struct.png)
 **Longest emission wavelength** (473 nm), S₁ = 2.62 eV
 
-### Molecular Orbitals (TDDFT Character)
+</details>
 
-#### DMAC-DPS — HOMO (Donor-localized)
-![DMAC-DPS HOMO](examples/figures/mol_DMAC-DPS_homo.png)
+### Molecular Orbitals
 
-#### DMAC-DPS — LUMO (Acceptor-localized)
-![DMAC-DPS LUMO](examples/figures/mol_DMAC-DPS_lumo.png)
+<details>
+<summary><b>Click to expand HOMO/LUMO orbitals</b></summary>
 
-The spatial separation between HOMO (on DMAC donor) and LUMO (on DPS acceptor) is the hallmark of TADF-active molecules, enabling small ΔE_ST through spatial overlap control.
+The spatial separation between HOMO (donor-localized) and LUMO (acceptor-localized) is the hallmark of TADF-active molecules, enabling small ΔE_ST through spatial overlap control.
 
-#### PXZ-TRZ — HOMO
-![PXZ-TRZ HOMO](examples/figures/mol_PXZ-TRZ_homo.png)
+#### DMAC-DPS
+| HOMO (Donor) | LUMO (Acceptor) |
+|:---:|:---:|
+| ![DMAC-DPS HOMO](examples/figures/mol_DMAC-DPS_homo.png) | ![DMAC-DPS LUMO](examples/figures/mol_DMAC-DPS_lumo.png) |
 
-#### PXZ-TRZ — LUMO
-![PXZ-TRZ LUMO](examples/figures/mol_PXZ-TRZ_lumo.png)
+#### PXZ-TRZ
+| HOMO (Donor) | LUMO (Acceptor) |
+|:---:|:---:|
+| ![PXZ-TRZ HOMO](examples/figures/mol_PXZ-TRZ_homo.png) | ![PXZ-TRZ LUMO](examples/figures/mol_PXZ-TRZ_lumo.png) |
 
-#### PXZ-BO — HOMO
-![PXZ-BO HOMO](examples/figures/mol_PXZ-BO_homo.png)
+#### PXZ-BO
+| HOMO (Donor) | LUMO (Acceptor) |
+|:---:|:---:|
+| ![PXZ-BO HOMO](examples/figures/mol_PXZ-BO_homo.png) | ![PXZ-BO LUMO](examples/figures/mol_PXZ-BO_lumo.png) |
 
-#### PXZ-BO — LUMO
-![PXZ-BO LUMO](examples/figures/mol_PXZ-BO_lumo.png)
+</details>
 
 ### Absorption & Emission Spectra
+
+<details>
+<summary><b>Click to expand spectra</b></summary>
 
 #### DMAC-BO (f = 0.09)
 ![DMAC-BO Spectra](examples/figures/mol_DMAC-BO_spectra.png)
@@ -104,88 +135,82 @@ The spatial separation between HOMO (on DMAC donor) and LUMO (on DPS acceptor) i
 #### PXZ-BO (f = 0.05)
 ![PXZ-BO Spectra](examples/figures/mol_PXZ-BO_spectra.png)
 
-## Quick Start
+</details>
+
+## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.10+ (PySCF, numpy, matplotlib)
-- RDKit (via conda: `conda install -c conda-forge rdkit`)
-- xTB 6.x (`brew install xtb` or from [xtb website](https://www.chemie.uni-bonn.de/ctc/xtb/))
-- xyzrender (`pip install xyzrender`)
 
-### Run Screening
+- **Python 3.10+** with PySCF, numpy, matplotlib
+- **RDKit** (`conda install -c conda-forge rdkit`)
+- **xTB 6.x** ([install guide](https://www.chemie.uni-bonn.de/ctc/xtb/))
+- **xyzrender** (`pip install xyzrender`)
+
+### Installation
 
 ```bash
-# 1. Clone repo
 git clone https://github.com/silico-quantum/tadf-screening.git
 cd tadf-screening
-
-# 2. Install dependencies
 pip install -r requirements.txt
-
-# 3. Run the 12-molecule screening
-python3 examples/screen_12molecules.py
-
-# Results saved to examples/figures/
-# - screening_results.csv
-# - mol_*_struct.png (structures)
-# - mol_*_homo.png / mol_*_lumo.png (orbitals)
-# - mol_*_spectra.png (absorption + emission)
 ```
+
+### Run the Demo
+
+```bash
+python3 examples/screen_12molecules.py
+```
+
+Output in `examples/figures/`:
+- `screening_results.csv` — tabular results
+- `mol_*_struct.png` — molecular structures (xyzrender)
+- `mol_*_homo.png` / `mol_*_lumo.png` — molecular orbitals
+- `mol_*_spectra.png` — absorption + emission spectra
 
 ### Custom Screening
 
-Add your own molecules to `data/known_tadf.json`:
+Edit `data/known_tadf.json` to add your molecules:
+
 ```json
 {
-  "My-Molecule": "CN(C)c1ccc2nc(-c3ccc(cc3)-c4ncnc4c5ccccc5)cc2c1"
+  "My-Molecule": "CN(C)c1ccc2nc(-c3ccc(cc3)-c4ncnc4c5ccccc5)cc2c1",
+  "Another-One": "O1c2ccccc2Nc3ccccc13c4ncnc(n4)c5ccccc5"
 }
 ```
 
-## Pipeline Details
+## ⚙️ Pipeline Details
 
-### Geometry Optimization (xTB GFN-FF)
-- ~3-5 seconds per molecule
-- Sufficient for screening-level accuracy
-- For final candidates, upgrade to GFN2-xTB or DFT optimization
+| Step | Tool | Time | Notes |
+|------|------|------|-------|
+| 3D conformer | RDKit ETKDG | <1s | Single conformer |
+| Geometry opt | xTB GFN-FF | 3-5s | Semi-empirical |
+| S₁ energy | PySCF TDA | 5-30s | B3LYP/3-21G, 10 states |
+| T₁ energy | PySCF ΔSCF | 5-30s | UKS spin=2 |
+| Visualization | xyzrender | 1-2s | Structure + MO rendering |
 
-### Excited State Calculation (PySCF TDDFT)
-- Method: TDA (Tamm-Dancoff Approximation)
-- Functional: B3LYP
-- Basis: 3-21G (fast screening) → def2-SVP (final candidates)
-- States: 10 singlet excited states
-- Oscillator strengths from TDA transition dipole moments
+### Key Implementation Notes
 
-### T₁ Energy (ΔSCF)
-- UKS with spin=2 for triplet ground state
-- ΔE_ST = E(S₁) - E(T₁)
-- More reliable than TDDFT triplet for screening
+- **ΔSCF for T₁**: UKS with `spin=2` gives triplet ground state; ΔE_ST = E(S₁) - E(T₁)
+- **PySCF 2.12 API**: `td.oscillator_strength()` is a **method call**, not a property
+- **xyzrender cube fix**: PySCF cube files need negative natoms + MO index line appended
+- **Large molecules**: Skip PySCF for >35 heavy atoms (use xTB-only mode)
 
-### Molecular Orbital Visualization
-- PySCF cubegen → cube files
-- Cube files modified for xyzrender compatibility (negative natoms + MO index line)
-- Rendered with `xyzrender --mo --flat-mo --iso 0.04`
+## 📚 References
 
-## Known Limitations
+- Tchapet Njafa et al., arXiv:2511.00922v1 — 747-molecule TADF benchmark, sTDA-xTB
+- Adachi et al., *Nature* **2001**, 410, 794 — Discovery of TADF
+- Dias et al., *Chem. Rev.* **2017**, 117, 7019 — Organic TADF design principles
+- Grimme, *JCTC* **2019**, 15, 2847 — GFN2-xTB method
 
-1. **3-21G basis** is small — for publication-quality results, use def2-SVP or 6-31G*
-2. **Gas phase** calculations — solvent effects (PCM/SMD) shift energies by ~0.1-0.3 eV
-3. **xTB GFN-FF** geometry — GFN2-xTB or DFT optimization for final candidates
-4. **No conformational search** — ETKDG generates one conformer; CREST recommended for flexible molecules
-5. **PySCF 2.12 API** — `td.oscillator_strength()` is a method call, not a property
-6. **Large molecules (>35 heavy atoms)** — skip PySCF, use xTB only (memory/time)
-
-## Methodology References
-
-- Tchapet Njafa et al., arXiv:2511.00922v1 — 747-molecule TADF benchmark
-- Adachi et al., Nature 2001, 410, 794 — TADF discovery
-- Dias et al., Chem. Rev. 2017, 117, 7019 — Organic TADF design principles
-- Grimme, JCTC 2019, 15, 2847 — GFN2-xTB method
-
-## License
+## 📄 License
 
 MIT
 
-## Author
+---
 
-Silico (硅灵) 🔮 — AI Research Partner
-[GitHub](https://github.com/silico-quantum)
+**Silico (硅灵)** 🔮 — AI Research Partner
+
+<p>
+  <a href="https://github.com/silico-quantum"><b>silico-quantum</b></a> ·
+  <a href="https://github.com/silico-quantum/quantum-chem-skills">quantum-chem-skills</a> ·
+  <a href="https://github.com/silico-quantum/tadf-screening">tadf-screening</a>
+</p>
