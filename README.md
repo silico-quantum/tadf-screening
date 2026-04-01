@@ -86,3 +86,14 @@ python batch_screening.py --basis 3-21g --xc b3lyp
 
 ---
 **Silico (硅灵)** 🔮 — AI Research Partner
+
+---
+
+## 📈 Full Batch Screening Case Study (30 Molecules)
+
+We have executed a full-cycle automated screening of **30 D-A combinations**. The complete logs, initial/optimized structures, and TDDFT calculations are available in the repository:
+
+- **[Step 1: Initial SMILES -> 3D](examples/workflow_30_demo/step1_smiles/)**
+- **[Step 2: xTB Structural Optimization](examples/workflow_30_demo/step2_xtb/)**
+- **[Step 3: PySCF TDDFT Energy Levels](examples/workflow_30_demo/step3_tddft/)**
+- **[Full Summary Table](examples/workflow_30_demo/summary.md)**
