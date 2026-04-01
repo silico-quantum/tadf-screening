@@ -49,7 +49,7 @@ The screening results show a high $S_1$ energy suitable for deep-blue emission w
 
 ---
 
-## 📈 Batch Screening Results (Top 5)
+## 📉 Batch Screening Results (Top 5)
 
 | Candidate ID | Donor-Acceptor | $S_1$ (eV) | $\Delta E_{ST}$ (eV) | Target Region |
 |:---:|:---|:---:|:---:|:---:|
@@ -58,6 +58,19 @@ The screening results show a high $S_1$ energy suitable for deep-blue emission w
 | TADF_007 | Dimethylacridine-Pyridine | 2.78 | 0.13 | Sky Blue |
 | TADF_005 | Phenoxazine-Sulfone | 2.45 | 0.07 | Green |
 | TADF_015 | Phenothiazine-Triazine | 2.12 | 0.07 | Red |
+
+---
+
+## 📂 Repository Structure & Data
+
+The repository is organized to facilitate reproducibility and data sharing:
+
+- **`data/`**: Contains curated datasets of **Known TADF Emitters** (\`known_tadf.json\`) used for benchmarking and validation.
+- **`examples/`**: Visual assets, including molecular structures, orbital plots, and simulated spectra for demonstration cases.
+- **`scripts/`**: Core automation scripts for candidate generation, xTB optimization, and PySCF computation.
+- **`temp/`**: (Generated during runtime) Temporary XYZ and log files from batch calculations.
+
+**Note:** Large simulation datasets and raw trajectory outputs are excluded. Curated samples are available upon request.
 
 ---
 
