@@ -11,13 +11,13 @@ This repository implements a fully automated pipeline for discovering deep-blue 
 
 ## 🚀 Screening Workflow
 
-The pipeline follows a multi-stage approach to efficiently filter candidate molecules:
+The pipeline implements an efficient multi-tier filtering strategy:
 
-1.  **Library Generation**: Stochastic assembly of Donor (D) and Acceptor (A) fragments via RDKit.
-2.  **Structure Optimization**: Fast geometric refinement using GFN2-xTB.
-3.  **Electronic Structure**: PySCF TDDFT calculations (B3LYP/3-21G for screening, B3LYP/cc-pVDZ for validation).
-4.  **Property Extraction**: Calculation of $S_1$, $T_1$ energies, $\Delta E_{ST}$, and Oscillator Strength ($f$).
-5.  **Validation**: Frontier molecular orbital (FMO) analysis and UV-Vis spectrum simulation.
+1.  **Initial 3D Modeling**: Generate 3D initial conformers from **SMILES** fragments using RDKit.
+2.  **Structural Pre-screening (xTB)**: Rapid geometric optimization and stability assessment using **GFN2-xTB**. Only stable, low-energy conformers proceed to the next stage.
+3.  **Optical Screening (TDDFT)**: Calculate excited-state properties ($S_1$, $T_1$) using **PySCF TDDFT** (B3LYP/3-21G) to identify candidates in the target emission region (e.g., Deep Blue).
+4.  **Property Extraction**: Determine $\Delta E_{ST}$ and Oscillator Strength ($f$) for verified emitters.
+5.  **Validation**: High-level validation (cc-pVDZ) and Frontier Molecular Orbital (FMO) analysis.
 
 ---
 
