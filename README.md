@@ -14,16 +14,29 @@ This repository is built upon the **[quantum-chem-skills](https://github.com/sil
 
 The pipeline implements an efficient multi-tier filtering strategy:
 
-```mermaid
-graph TD
-    A[SMILES Fragments] --> B[RDKit: 3D Conformer Generation]
-    B --> C[GFN2-xTB: Geometric Optimization]
-    C --> D{Structural Stability Filter}
-    D -- Pass --> E[PySCF: TDDFT Screening B3LYP/3-21G]
-    D -- Fail --> X[Discard]
-    E --> F[Delta-EST and Emission Color Analysis]
-    F --> G[Deep Blue Candidate Discovery]
-    G --> H[High-level Validation and FMO Analysis]
+```text
+[SMILES Fragments]
+       |
+       v
+[RDKit: 3D Conformer Generation]
+       |
+       v
+[GFN2-xTB: Geometric Optimization]
+       |
+       v
+[Structural Stability Filter] ----> [Discard (Fail)]
+       |
+       v (Pass)
+[PySCF: TDDFT Screening B3LYP/3-21G]
+       |
+       v
+[Delta-EST and Emission Color Analysis]
+       |
+       v
+[Deep Blue Candidate Discovery]
+       |
+       v
+[High-level Validation and FMO Analysis]
 ```
 
 1.  **SMILES Assembly**: Construct diverse D-A libraries from predefined molecular fragments.
