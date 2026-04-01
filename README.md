@@ -23,7 +23,7 @@ graph TD
     D -- Fail --> X[Discard]
     E --> F[Delta-EST and Emission Color Analysis]
     F --> G[Deep Blue Candidate Discovery]
-    G --> H[High-level Validation & FMO Analysis]
+    G --> H[High-level Validation and FMO Analysis]
 ```
 
 1.  **SMILES Assembly**: Construct diverse D-A libraries from predefined molecular fragments.
@@ -60,7 +60,7 @@ Frontier Molecular Orbitals (FMO) rendered with **xyzrender** isosurface density
 | Structure (xyzrender) | HOMO (xyzrender) | LUMO (xyzrender) |
 |:---:|:---:|:---:|
 | <img src="examples/cz_bn_structure.png" width="200"> | <img src="examples/cz_bn_homo.png" width="200"> | <img src="examples/cz_bn_lumo.png" width="200"> |
-| **Twisted D-A Geometry** | Donor-localized ($\pi$) | Acceptor-localized ($\pi^*$) |
+| **Twisted D-A Geometry** | Donor-localized (pi) | Acceptor-localized (pi*) |
 
 ---
 
