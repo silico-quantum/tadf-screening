@@ -27,13 +27,13 @@ The pipeline implements an efficient multi-tier filtering strategy:
 [Structural Stability Filter] ----> [Discard (Fail)]
        |
        v (Pass)
-[PySCF: TDDFT Screening B3LYP/3-21G]
+[PySCF: TDDFT Screening]
        |
        v
-[Delta-EST and Emission Color Analysis]
+[Delta-EST and Excited-State Analysis]
        |
        v
-[Deep Blue Candidate Discovery]
+[Target Candidate Discovery]
        |
        v
 [High-level Validation and FMO Analysis]
