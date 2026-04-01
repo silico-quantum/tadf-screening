@@ -21,7 +21,7 @@ graph TD
     C --> D{Structural Stability Filter}
     D -- Pass --> E[PySCF: TDDFT Screening B3LYP/3-21G]
     D -- Fail --> X[Discard]
-    E --> F[$\Delta E_{ST}$ & Emission Color Analysis]
+    E --> F[Delta-EST and Emission Color Analysis]
     F --> G[Deep Blue Candidate Discovery]
     G --> H[High-level Validation & FMO Analysis]
 ```
