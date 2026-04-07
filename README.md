@@ -34,7 +34,6 @@ skills/tadf-screening/
 └── scripts/
     ├── screening_workflow_initializer.py
     ├── build_da_topology_library.py
-    ├── generate_10k_structures_fast.py
     ├── run_xtb_batch_manifest.py
     ├── run_tddft_xtb_filter.py
     ├── smiles_assembler.py
@@ -88,22 +87,7 @@ Output:
 
 ---
 
-### 3) `scripts/generate_10k_structures_fast.py`
-
-High-throughput 3D structure generation.
-
-Responsibilities:
-- Convert validated product SMILES to 3D geometries.
-- Store candidates as `.xyz` files.
-- Use robust and fast generation strategy for large batches.
-
-Output:
-- `blue_plan_10k_xyz/*.xyz`
-- generation manifest/summary files.
-
----
-
-### 4) `scripts/run_xtb_batch_manifest.py`
+### 3) `scripts/run_xtb_batch_manifest.py`
 
 Batch xTB pre-screening runner.
 
@@ -121,7 +105,7 @@ Typical usage in this workflow:
 
 ---
 
-### 5) `scripts/run_tddft_xtb_filter.py`
+### 4) `scripts/run_tddft_xtb_filter.py`
 
 Semi-empirical wavelength-window filter after xTB.
 
@@ -140,7 +124,7 @@ TADF optional gate:
 
 ---
 
-### 6) `scripts/smiles_assembler.py` and `scripts/molzip_assembler.py`
+### 5) `scripts/smiles_assembler.py` and `scripts/molzip_assembler.py`
 
 SMILES-level assembly and validation tools.
 
@@ -148,6 +132,34 @@ Responsibilities:
 - Fragment validation and auditable rejection reasons.
 - Connectivity and sanitization checks.
 - Mapped-fragment assembly via `molzip` route when needed.
+
+---
+
+## Quick start by scenarios
+
+### Scenario A: Blue TADF (default practical path)
+1. Run initializer with `emission_type=TADF`, `emission_range_nm=450-490`, narrow width preference.
+2. Select topology (`D-A-D` or mixed) and sample count (default `10000`).
+3. Build topology library (`build_da_topology_library.py`).
+4. Generate `.xyz` structures with your project generator.
+5. Run `run_xtb_batch_manifest.py`.
+6. Run `run_tddft_xtb_filter.py` with your empirical Stokes shift.
+7. Send final shortlist to full TDDFT (S0 -> S1/T1 -> emission).
+
+### Scenario B: Fluorescence emitters (singlet-focused)
+1. Set `emission_type=Fluorescence`.
+2. Keep tighter oscillator/emission filtering in Stage 2.
+3. Final validation must include `S1` excited-state optimization before emission.
+
+### Scenario C: Phosphorescence emitters (triplet-focused)
+1. Set `emission_type=Phosphorescence`.
+2. Use topology and acceptor choices suitable for stronger SOC pathways.
+3. Final validation must include `T1` optimization before emission.
+
+### Scenario D: Proprietary fragment libraries
+1. Keep built-in DeepChem/PubChem enabled.
+2. Add `custom_db_paths` (`.csv` / `.smi`) in initializer.
+3. Re-run topology assembly on merged library.
 
 ---
 
