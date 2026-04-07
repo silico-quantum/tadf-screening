@@ -56,7 +56,7 @@ class TopologyType(str, Enum):
     d_a = "D-A"
     d_a_d = "D-A-D"
     a_d_a = "A-D-A"
-    d_pi_a = "D-π-A"
+    d_pi_a = "D-pi-A"
     d_n_a = "D_n-A"
 
 
@@ -66,6 +66,16 @@ class TDDFTEngine(str, Enum):
     qchem = "qchem"
     pyscf = "pyscf"
 
+
+class InteractionMode(str, Enum):
+    interactive_chat = "interactive_chat"
+    config_only = "config_only"
+    autonomous = "autonomous"
+
+
+class QuestionMode(str, Enum):
+    blocking = "blocking"
+    non_blocking = "non_blocking"
 
 # -----------------------------
 # Pydantic model
@@ -104,14 +114,19 @@ class WorkflowConfig(BaseModel):
 
     topology_preferences: List[TopologyType] = Field(
         default_factory=lambda: [TopologyType.d_a, TopologyType.d_a_d],
-        description="Allowed assembly topologies: D-A, D-A-D, A-D-A, D-π-A, D_n-A.",
+        description="Allowed assembly topologies: D-A, D-A-D, A-D-A, D-pi-A, D_n-A. Initializer should actively ask user to confirm one or multiple topologies.",
     )
 
     # Stage sizing
+    initial_sample_count: int = Field(
+        default=10000,
+        ge=100,
+        description="Initial number of generated candidates before filtering. Ask user in inquiry stage; if not provided use default 10000.",
+    )
     stage1_library_size: int = Field(
         default=10000,
         ge=100,
-        description="Stage-1 candidate count for RDKit assembly + MMFF94 + xTB stability screening.",
+        description="Alias for stage-1 candidate count in RDKit assembly + MMFF94 + xTB stability screening. If unset in other systems, mirror initial_sample_count.",
     )
     stage2_absorption_window_nm: Tuple[float, float] = Field(
         default=(350.0, 700.0),
@@ -153,9 +168,18 @@ class WorkflowConfig(BaseModel):
     )
 
     # Runtime control
-    autonomous_mode: bool = Field(
-        default=False,
-        description="If True, do not wait for interactive user choices; apply smart defaults automatically.",
+    interaction_mode: InteractionMode = Field(
+        default=InteractionMode.interactive_chat,
+        description="How the initializer handles missing information in inquiry stage: interactive_chat asks user, config_only reads config without live Q&A, autonomous uses defaults and continues.",
+    )
+    question_mode: QuestionMode = Field(
+        default=QuestionMode.blocking,
+        description="Inquiry-stage execution style: blocking waits for answers before proceeding; non_blocking records questions and proceeds with provisional defaults.",
+    )
+    max_question_rounds: int = Field(
+        default=3,
+        ge=1,
+        description="Maximum clarification rounds allowed during inquiry stage.",
     )
     remote_hpc_hint: Optional[str] = Field(
         default=None,
@@ -174,6 +198,9 @@ class WorkflowConfig(BaseModel):
 
         if self.stokes_shift_strategy == "fixed" and self.empirical_stokes_shift_ev is None:
             raise ValueError("empirical_stokes_shift_ev is required when stokes_shift_strategy='fixed'")
+
+        if self.interaction_mode == InteractionMode.autonomous and self.question_mode == QuestionMode.blocking:
+            raise ValueError("autonomous mode should use non_blocking question_mode")
 
         if self.stokes_shift_strategy == "calibration" and not self.calibration_dataset_path:
             raise ValueError("calibration_dataset_path is required when stokes_shift_strategy='calibration'")
@@ -437,12 +464,64 @@ def generate_emission_spectrum(
 # Main initializer
 # -----------------------------
 
+def _active_inquiry_questions(params: WorkflowConfig, engine_map: Dict[str, bool]) -> Tuple[List[str], List[str]]:
+    """Build natural-language clarification questions for missing critical fields.
+
+    Why:
+    - The initializer must not silently assume critical boundary conditions.
+    - If user prompt/config omitted key fields, ask explicitly before final execution.
+    """
+    questions: List[str] = []
+    missing: List[str] = []
+
+    provided = set(getattr(params, "model_fields_set", set()))
+
+    critical_fields = [
+        "emission_range_nm",
+        "emission_type",
+        "spectrum_width_requirement",
+        "empirical_stokes_shift_ev",
+        "topology_preferences",
+    ]
+
+    for f in critical_fields:
+        if f not in provided:
+            missing.append(f)
+
+    if "emission_range_nm" in missing:
+        questions.append("What is the target emission range in nm (min, max)? Example: 450-490.")
+
+    if "emission_type" in missing:
+        questions.append("Which emission mechanism should be targeted: Fluorescence, Phosphorescence, or TADF?")
+
+    if "spectrum_width_requirement" in missing:
+        questions.append("What spectrum width preference do you want: Narrow/High Color Purity, Broad/White Light, or Any?")
+
+    if "empirical_stokes_shift_ev" in missing:
+        questions.append("Please provide empirical Stokes shift (eV) for semi-empirical screening (e.g., 0.5 eV).")
+
+    if "topology_preferences" in missing:
+        questions.append("Which topologies should be enabled: D-A, D-A-D, A-D-A, D-pi-A, D_n-A (single or mixed)?")
+
+    if "initial_sample_count" not in provided:
+        questions.append("How many initial candidates should be generated? Default is 10000 if you do not specify.")
+
+    available_engines = [k for k, v in engine_map.items() if v]
+    if len(available_engines) > 1:
+        questions.append(
+            f"Multiple TDDFT engines are available: {available_engines}. Please confirm which engine to use."
+        )
+
+    return questions, missing
+
+
 def initialize_workflow(params: WorkflowConfig) -> str:
     """Initialize and summarize workflow setup as a JSON string.
 
     Returns:
         JSON string with project boundary conditions, hardware limits,
-        stage-by-stage filtering protocol, and strict downstream constraints.
+        stage-by-stage filtering protocol, strict downstream constraints,
+        and active-inquiry questions for missing critical inputs.
     """
 
     hw = _detect_hardware()
@@ -451,15 +530,19 @@ def initialize_workflow(params: WorkflowConfig) -> str:
 
     db_report = _validate_custom_db_paths(params.custom_db_paths)
     engine_map = _discover_tddft_engines()
+    auto_mode = params.interaction_mode == InteractionMode.autonomous
     chosen_engine, engine_questions = _choose_tddft_engine(
         requested=params.tddft_engine,
         available_map=engine_map,
         compute_tier=compute_tier,
-        autonomous_mode=params.autonomous_mode,
+        autonomous_mode=auto_mode,
     )
 
     questions: List[str] = []
     questions.extend(engine_questions)
+
+    inquiry_questions, missing_critical_fields = _active_inquiry_questions(params, engine_map)
+    questions.extend(inquiry_questions)
 
     if params.augment_with_custom_db is None:
         questions.append(
@@ -483,7 +566,9 @@ def initialize_workflow(params: WorkflowConfig) -> str:
         "project": {
             "name": params.project_name,
             "compute_tier": compute_tier.value,
-            "autonomous_mode": params.autonomous_mode,
+            "interaction_mode": params.interaction_mode.value,
+            "question_mode": params.question_mode.value,
+            "max_question_rounds": params.max_question_rounds,
         },
         "system_hardware_profile": {
             "hardware": hw,
@@ -534,7 +619,7 @@ def initialize_workflow(params: WorkflowConfig) -> str:
         "pyramid_filtering_strategy": {
             "stage1_rdkit_mmff_xtb_stability": {
                 "objective": "Assemble molecules by topology rules, run RDKit MMFF94 pre-optimization, then xTB geometry optimization/stability screening.",
-                "library_size": params.stage1_library_size,
+                "library_size": params.initial_sample_count,
                 "required_steps": [
                     "RDKit SMILES sanitization",
                     "RDKit 3D embedding",
@@ -593,6 +678,16 @@ def initialize_workflow(params: WorkflowConfig) -> str:
                 "equation": "I(E)=sum_i f_i exp(-(E-E_i)^2/(2 sigma^2))",
                 "axis_conversion": "lambda(nm)=1240/E(eV)",
             },
+        },
+        "inquiry_stage_runtime": {
+            "mode": params.interaction_mode.value,
+            "question_mode": params.question_mode.value,
+            "max_rounds": params.max_question_rounds,
+            "action_policy": (
+                "ask-and-wait" if params.question_mode == QuestionMode.blocking else "ask-and-continue-with-defaults"
+            ),
+            "missing_critical_fields": missing_critical_fields,
+            "ready_to_proceed": not (params.question_mode == QuestionMode.blocking and len(missing_critical_fields) > 0),
         },
         "agent_questions_if_missing": questions,
     }
