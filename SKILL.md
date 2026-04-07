@@ -12,7 +12,7 @@ Run this skill for end-to-end candidate generation and filtering.
 1. Run `scripts/screening_workflow_initializer.py` first.
 2. Confirm topology and initial sample count during inquiry stage (default initial sample count: `10000`).
 3. Build topology-driven D/A assemblies (`scripts/build_da_topology_library.py`).
-4. Generate candidate structures (`scripts/generate_10k_structures_fast.py`).
+4. Generate candidate 3D structures with your project-level generator (outside this skill package) and export `.xyz` files.
 5. Run xTB batch pre-screening (`scripts/run_xtb_batch_manifest.py`).
 6. Optionally run TDDFT-xTB wavelength filter (`scripts/run_tddft_xtb_filter.py`).
 7. Send elite candidates to full TDDFT validation.
