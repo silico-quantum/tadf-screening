@@ -4,6 +4,14 @@ Standardized, stage-gated workflow for high-throughput luminescent materials scr
 
 This skill is designed for autonomous agents and human-in-the-loop execution. It enforces strict boundary initialization, topology-aware assembly, stability filtering, wavelength filtering, and final TDDFT validation.
 
+## OpenClaw-Powered Agentic Workflow
+
+<p align="center">
+  <img src="assets/openclaw-agentic-workflow.jpg" width="900" alt="Traditional TADF screening vs OpenClaw-powered agentic workflow">
+  <br>
+  <i>Comparison of traditional manual TADF screening and the OpenClaw-powered agentic workflow used in this project.</i>
+</p>
+
 ---
 
 ## What this skill does
