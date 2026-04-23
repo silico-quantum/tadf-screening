@@ -207,14 +207,6 @@ Run initializer and resolve missing critical fields.
 
 ---
 
-## Notes for remote Marcus runs
-
-- Keep generation local if RDKit is unavailable remotely.
-- Push `.xyz` batches to Marcus for xTB and later TDDFT steps.
-- Exclude macOS sidecar files (`._*`) during upload.
-
----
-
 ## References
 
 - `references/workflow-spec.md`
