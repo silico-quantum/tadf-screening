@@ -17,13 +17,14 @@ sys.stdout.reconfigure(line_buffering=True)
 sys.stderr.reconfigure(line_buffering=True)
 
 # Paths
-RDKIT_PYTHON = "/Users/molbot/miniconda3/bin/python3"
-PYSCF_PYTHON = "/opt/homebrew/bin/python3"
-XTB_BIN = "/opt/homebrew/bin/xtb"
-XYZRENDER_BIN = "/Users/molbot/.local/bin/xyzrender"
+WORK_DIR = Path(__file__).resolve().parents[1]
+DEFAULT_PYTHON = os.environ.get("TADF_SCREENING_PYTHON", sys.executable)
+RDKIT_PYTHON = os.environ.get("RDKIT_PYTHON", DEFAULT_PYTHON)
+PYSCF_PYTHON = os.environ.get("PYSCF_PYTHON", DEFAULT_PYTHON)
+XTB_BIN = os.environ.get("XTB_BIN", shutil.which("xtb") or "xtb")
+XYZRENDER_BIN = os.environ.get("XYZRENDER_BIN", shutil.which("xyzrender") or "xyzrender")
 
 # Directories
-WORK_DIR = Path("/Users/molbot/.openclaw/workspace/tadf-screening")
 DATA_FILE = WORK_DIR / "data" / "known_tadf.json"
 OUTPUT_DIR = WORK_DIR / "examples" / "figures"
 TEMP_DIR = WORK_DIR / "temp"

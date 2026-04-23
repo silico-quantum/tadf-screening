@@ -270,7 +270,7 @@ def main():
     ap_audit.add_argument('--out', required=True)
 
     ap_build = sub.add_parser('build')
-    ap_build.add_argument('--project-root', default='/Users/molbot/.openclaw/workspace/tadf-screening')
+    ap_build.add_argument('--project-root', default=str(Path(__file__).resolve().parents[1]))
     ap_build.add_argument('--candidates', required=True)
     ap_build.add_argument('--donors', required=True)
     ap_build.add_argument('--acceptors', required=True)
