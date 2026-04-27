@@ -218,9 +218,10 @@ def main():
     parser.add_argument('--temperature', '-T', type=float, default=300, help='Temperature (K)')
     parser.add_argument('--target', default='blue',
                        choices=list(COLOR_PRESETS.keys()),
-                       help='Target emission color (preset window)')
+                       help='Target emission color (preset window). Can also be set via --config from Stage 0.')
     parser.add_argument('--window', '-w', nargs=2, type=float, metavar=('MIN', 'MAX'),
                        help='Custom emission window in nm (e.g. --window 480 520)')
+    parser.add_argument('--config', '-c', help='Path to Stage 0 workflow config JSON (auto-extracts target color/window)')
     parser.add_argument('--report', '-r', default='stage4_report.md', help='Report filename')
     args = parser.parse_args()
 
@@ -228,7 +229,23 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
     
     # Resolve target window
-    if args.window:
+    if args.config and Path(args.config).exists():
+        with open(args.config) as f:
+            cfg = json.load(f)
+        targets = cfg.get('photophysical_targets', {})
+        cfg_color = targets.get('emission_color', '')
+        cfg_range = targets.get('emission_range_nm', [])
+        if cfg_color and cfg_color in COLOR_PRESETS:
+            target_window = COLOR_PRESETS[cfg_color]
+            target_name = cfg_color
+        elif len(cfg_range) == 2:
+            target_window = tuple(cfg_range)
+            target_name = f'{target_window[0]}-{target_window[1]}'
+        else:
+            target_window = COLOR_PRESETS['blue']
+            target_name = 'blue'
+        print(f"📋 Loaded from config: {target_name} ({target_window[0]}–{target_window[1]} nm)")
+    elif args.window:
         target_window = tuple(args.window)
         target_name = f'{target_window[0]}-{target_window[1]}'
     else:

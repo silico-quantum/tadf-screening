@@ -52,6 +52,34 @@ class SpectrumWidthRequirement(str, Enum):
     any = "Any"
 
 
+class EmissionColor(str, Enum):
+    """Target emission color presets with standard wavelength ranges."""
+    deep_blue = "deep-blue"
+    blue = "blue"
+    sky_blue = "sky-blue"
+    green = "green"
+    yellow = "yellow"
+    orange = "orange"
+    red = "red"
+    deep_red = "deep-red"
+    nir = "nir"
+    custom = "custom"
+
+
+# Wavelength range presets (nm)
+COLOR_WINDOW: dict[EmissionColor, tuple[float, float]] = {
+    EmissionColor.deep_blue: (430.0, 460.0),
+    EmissionColor.blue:      (450.0, 490.0),
+    EmissionColor.sky_blue:  (470.0, 500.0),
+    EmissionColor.green:     (500.0, 550.0),
+    EmissionColor.yellow:    (550.0, 600.0),
+    EmissionColor.orange:    (580.0, 620.0),
+    EmissionColor.red:       (600.0, 700.0),
+    EmissionColor.deep_red:  (650.0, 750.0),
+    EmissionColor.nir:       (700.0, 1000.0),
+}
+
+
 class TopologyType(str, Enum):
     d_a = "D-A"
     d_a_d = "D-A-D"
@@ -86,9 +114,13 @@ class WorkflowConfig(BaseModel):
         default="luminescent-screening-project",
         description="Human-readable project name for run logs and output folders.",
     )
-    emission_range_nm: Tuple[float, float] = Field(
-        ...,
-        description="Target emission wavelength window in nm as (min_nm, max_nm), e.g. (450, 490) for blue emitters.",
+    emission_color: Optional[EmissionColor] = Field(
+        default=None,
+        description="Target emission color preset. Auto-fills emission_range_nm. Set to 'custom' for manual range.",
+    )
+    emission_range_nm: Optional[Tuple[float, float]] = Field(
+        default=None,
+        description="Target emission wavelength window in nm as (min_nm, max_nm). Auto-filled from emission_color if provided.",
     )
     emission_type: EmissionType = Field(
         ...,
@@ -188,6 +220,11 @@ class WorkflowConfig(BaseModel):
 
     @model_validator(mode="after")
     def validate_ranges(self):
+        # Auto-fill emission_range_nm from color preset
+        if self.emission_color and self.emission_color != EmissionColor.custom:
+            self.emission_range_nm = COLOR_WINDOW[self.emission_color]
+        if self.emission_range_nm is None:
+            raise ValueError("Either emission_color or emission_range_nm must be set")
         mn, mx = self.emission_range_nm
         if mn <= 0 or mx <= 0 or mn >= mx:
             raise ValueError("emission_range_nm must be positive and min < max")
@@ -477,7 +514,7 @@ def _active_inquiry_questions(params: WorkflowConfig, engine_map: Dict[str, bool
     provided = set(getattr(params, "model_fields_set", set()))
 
     critical_fields = [
-        "emission_range_nm",
+        "emission_color",
         "emission_type",
         "spectrum_width_requirement",
         "empirical_stokes_shift_ev",
@@ -488,8 +525,9 @@ def _active_inquiry_questions(params: WorkflowConfig, engine_map: Dict[str, bool
         if f not in provided:
             missing.append(f)
 
-    if "emission_range_nm" in missing:
-        questions.append("What is the target emission range in nm (min, max)? Example: 450-490.")
+    if "emission_color" in missing:
+        colors = ', '.join([c.value for c in EmissionColor])
+        questions.append(f"Target emission color? Options: {colors}. Or provide manual range (min_nm, max_nm).")
 
     if "emission_type" in missing:
         questions.append("Which emission mechanism should be targeted: Fluorescence, Phosphorescence, or TADF?")
@@ -580,6 +618,7 @@ def initialize_workflow(params: WorkflowConfig) -> str:
             },
         },
         "photophysical_targets": {
+            "emission_color": params.emission_color.value if params.emission_color else "custom",
             "emission_range_nm": list(params.emission_range_nm),
             "emission_type": params.emission_type.value,
             "spectrum_width_requirement": params.spectrum_width_requirement.value,
@@ -698,7 +737,8 @@ def initialize_workflow(params: WorkflowConfig) -> str:
 if __name__ == "__main__":
     # Minimal demo usage
     demo = WorkflowConfig(
-        emission_range_nm=(450, 490),
+        emission_color=EmissionColor.blue,
+        emission_range_nm=None,
         emission_type=EmissionType.tadf,
         spectrum_width_requirement=SpectrumWidthRequirement.narrow,
     )
