@@ -27,7 +27,14 @@ Every stage must include an explicit supervision task and report item.
 - **Stage 1 (SMILES -> XYZ)**: track `xyz_count / target_count`, manifest existence, process alive/stopped, restart action if interrupted.
 - **Stage 2 (xTB + sTDA)**: track Slurm queue state, produced `_opt.log` / `_xtb4stda.log` / `_stda.log` counts, and error signature checks (e.g., invalid option errors).
 - **Stage 3 (TDDFT validation)**: track submitted jobs, running/pending/failed counts, parsed success ratio, and failed-case reasons.
-- **Stage 4 (analysis/report)**: track result file completeness (ranked CSV, shortlist, plots) and publish final summary with pass/fail statistics.
+- **Stage 4 (MOMAP photophysics)**: track result file completeness (ranked CSV, shortlist, plots) and publish final summary with pass/fail statistics.
+  - **Engine:** MOMAP 2024A via `python scripts/stage4_momap.py`.
+  - **Requires:** S0/S1/T1 `.log` + `.fchk` from Stage 3 (auto formchk if missing).
+  - **Runs:** EVC(Duschinsky) → spec_tvcf(fluorescence spectrum) → optional ISC rate.
+  - **Ranking:** blue window proximity (450–490 nm) × ΔE_ST × f_emi.
+  - **MPI patch:** auto-applied for OpenMPI 3.x `-machinefile`→`--hostfile`.
+  - **No fake results:** if MOMAP binary is missing or license absent, report `tool_missing` and stop.
+  - **Output:** `stage4_report.md`, `stage4_results.json`, per-molecule PNG plots.
 
 Minimum monitoring cadence default remains:
 - check every 5 minutes

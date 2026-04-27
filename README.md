@@ -193,9 +193,27 @@ Run initializer and resolve missing critical fields.
 - Protocol: `S0 opt -> S1/T1 opt -> vertical emission`.
 - Use selected engine and `tddft_level` from initializer.
 
-### Stage 4 — Emission spectrum rendering
-- Build broadened emission profile from discrete transitions.
-- Convert energy axis to wavelength axis.
+### Stage 4 — MOMAP Photophysics (NEW ✨)
+- **Engine:** MOMAP 2024A (TVCF method, B3LYP/6-31G*).
+- **Requires:** Gaussian `.log` + `.fchk` from Stage 3 (S0/S1/T1).
+- **Computes:**
+  - EVC (electron-vibration coupling): Duschinsky matrix + Huang-Rhys factors.
+  - spec_tvcf: Franck-Condon emission spectrum with temperature broadening.
+  - ISC rate: S1→T1 intersystem crossing rate (key for TADF RISC).
+- **Filter:** peak emission in blue window (450–490 nm) + ΔE_ST < 0.3 eV.
+- **Output:** `stage4_report.md` (ranked), `stage4_results.json`, per-molecule spectrum PNG.
+
+**Usage:**
+```bash
+# Single molecule
+python scripts/stage4_momap.py --mol-id mol_07566 \
+    --s0 logs/s0.log --s1 logs/s1.log --t1 logs/t1.log
+
+# Batch from CSV (cols: mol_id,s0_log,s1_log,t1_log)
+python scripts/stage4_momap.py candidates.csv --output stage4_output/
+```
+
+**Scoring:** blue window proximity × ΔE_ST × f_emi → ranked shortlist.
 
 ---
 
